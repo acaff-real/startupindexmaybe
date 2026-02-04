@@ -24,7 +24,7 @@ Unzip the project folder and open your terminal (Command Prompt or PowerShell) i
 
 ### Step 2: Install Dependencies
 Run the following command to install the required financial libraries:
-```bash
+
 pip install -r requirements.txt
 
 ### How to Run
