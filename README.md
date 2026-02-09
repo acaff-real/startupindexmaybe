@@ -30,11 +30,9 @@ pip install -r requirements.txt
 ### How to Run
 
 To launch the dashboard, run this command in your terminal:
-
 ```
 streamlit run app.py
 ```
-
 Unlike basic price trackers, this tool constructs Market-Cap Weighted Indices.
 
 The Formula:
