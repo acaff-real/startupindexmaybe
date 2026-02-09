@@ -14,7 +14,7 @@ GREEN_TICKERS = [
     "SOLEX.NS", "SWSOLAR.NS", "SUZLON.NS", "TATAPOWER.NS", 
     "VIKRAMSOLR.NS", "WAAREEENER.NS", "WAAREERTL.NS", "SAATVIKGL.NS", 
     "JSWENERGY.NS", "SOLARWORLD.NS",  "GKENERGY.NS", "OLECTRA.NS", 
-    "WEBSOLAR.NS", "ADVAIT.NS"
+    "WEBELSOLAR.NS", "ADVAIT.NS"
 ]
 
 STARTUP_TICKERS = [
@@ -24,11 +24,12 @@ STARTUP_TICKERS = [
      "WEWORK.NS",  "INDIQUBE.NS"   
 ]
 
+
 BENCHMARK_TICKER = "^NSEI"
 
 # --- APP SETUP ---
 st.set_page_config(page_title="Market Analyzer Pro", layout="wide")
-st.title("Market Analyzer Pro: Fundamentals & Technicals")
+st.title("Market Analyzer Pro: Equity Terminal")
 
 # --- BACKEND LOGIC ---
 @st.cache_data
@@ -56,13 +57,15 @@ def fetch_fundamental_data(tickers):
     df['shares'] = df['shares'].fillna(df['shares'].median())
     return df
 
+@st.cache_data
 def calculate_weighted_index(tickers, start_date, end_date, shares_series):
+    # Only fetch chart data (Short term)
     start_str = start_date.strftime('%Y-%m-%d')
     end_str = (end_date + timedelta(days=1)).strftime('%Y-%m-%d')
     
     raw_data = yf.download(tickers, start=start_str, end=end_str, threads=False, auto_adjust=False)
     
-    if raw_data.empty: return None, None
+    if raw_data.empty: return None
 
     if 'Adj Close' in raw_data.columns.levels[0]:
         prices = raw_data['Adj Close']
@@ -72,96 +75,132 @@ def calculate_weighted_index(tickers, start_date, end_date, shares_series):
         prices = raw_data.iloc[:, :len(tickers)]
     
     prices = prices.dropna(axis=1, how='all').ffill().bfill()
-    if prices.empty: return None, None
+    if prices.empty: return None
 
     common_cols = prices.columns.intersection(shares_series.index)
     market_caps = prices[common_cols].mul(shares_series[common_cols], axis=1)
     total_market_cap = market_caps.sum(axis=1)
     
-    if total_market_cap.empty: return None, None
+    if total_market_cap.empty: return None
         
     base_value = total_market_cap.iloc[0]
     index_series = (total_market_cap / base_value) * 100
     
-    return index_series, prices
+    return index_series
 
 @st.cache_data
-def get_dashboard_data(start_date, end_date, _green_meta, _startup_meta):
-    green_shares = _green_meta['shares']
-    startup_shares = _startup_meta['shares']
-    
-    green_idx, green_prices = calculate_weighted_index(GREEN_TICKERS, start_date, end_date, green_shares)
-    startup_idx, startup_prices = calculate_weighted_index(STARTUP_TICKERS, start_date, end_date, startup_shares)
-    
+def fetch_rich_stats(tickers, end_date):
+    """
+    Downloads ~1 year of data to calculate 52W High/Low and 30D Change.
+    Returns a DataFrame with the latest Snapshot of all metrics.
+    """
+    # Look back 370 days to ensure we have enough data for 52W High/Low
+    start_lookback = end_date - timedelta(days=370)
     end_str = (end_date + timedelta(days=1)).strftime('%Y-%m-%d')
-    nifty_data = yf.download(BENCHMARK_TICKER, start=start_date, end=end_str, threads=False, auto_adjust=False)
     
-    if not nifty_data.empty:
+    # Download OHLCV data
+    data = yf.download(tickers, start=start_lookback, end=end_str, group_by='ticker', threads=False, auto_adjust=False)
+    
+    stats = []
+    
+    for ticker in tickers:
         try:
-            bench_prices = nifty_data['Adj Close'][BENCHMARK_TICKER]
-        except KeyError:
-            bench_prices = nifty_data['Adj Close'] if 'Adj Close' in nifty_data else nifty_data['Close']
-        bench_prices = bench_prices.ffill().bfill()
-        nifty_idx = (bench_prices / bench_prices.iloc[0]) * 100
-    else:
-        nifty_idx = None
-        
-    return green_idx, green_prices, startup_idx, startup_prices, nifty_idx
+            # Handle MultiIndex DataFrame from yfinance
+            if len(tickers) > 1:
+                df = data[ticker].copy()
+            else:
+                df = data.copy() # If only 1 ticker, structure is different
+            
+            # Drop empty days
+            df = df.dropna(how='all')
+            
+            if df.empty:
+                continue
+                
+            # Latest Data Point
+            latest = df.iloc[-1]
+            prev = df.iloc[-2] if len(df) > 1 else latest
+            
+            # --- CALCULATIONS ---
+            # 1. Price Stats
+            ltp = latest['Close'] if 'Close' in latest else latest['Adj Close']
+            prev_close = prev['Close'] if 'Close' in prev else prev['Adj Close']
+            change = ltp - prev_close
+            pct_change = (change / prev_close) * 100
+            
+            # 2. 52 Week Stats (Last 252 trading days)
+            last_year = df.tail(252)
+            high_52 = last_year['High'].max()
+            low_52 = last_year['Low'].min()
+            
+            # 3. 30 Day Change (Approx 21 trading days)
+            if len(df) > 21:
+                price_30d_ago = df.iloc[-21]['Close']
+                chng_30d = ((ltp - price_30d_ago) / price_30d_ago) * 100
+            else:
+                chng_30d = np.nan
 
-def generate_transparency_table(prices_df, metadata_df):
-    valid_tickers = prices_df.columns.intersection(metadata_df.index)
-    aligned_prices = prices_df[valid_tickers]
-    aligned_meta = metadata_df.loc[valid_tickers]
-    latest_prices = aligned_prices.iloc[-1]
-    
-    market_caps_raw = latest_prices * aligned_meta['shares']
-    total_cap = market_caps_raw.sum()
-    
-    weights = (market_caps_raw / total_cap) * 100 if total_cap != 0 else pd.Series(0, index=valid_tickers)
-    
-    if len(aligned_prices) >= 6:
-        week_ago_prices = aligned_prices.iloc[-6]
-        weekly_returns = ((latest_prices - week_ago_prices) / week_ago_prices) * 100
-    else:
-        start_prices = aligned_prices.iloc[0]
-        weekly_returns = np.where(start_prices == 0, 0, ((latest_prices - start_prices) / start_prices) * 100)
+            # 4. Volume & Value
+            vol = latest['Volume']
+            # Value in Crores = (Price * Volume) / 10,000,000
+            val_cr = (ltp * vol) / 10000000 
 
-    display_df = pd.DataFrame({
-        "Ticker": valid_tickers,
-        "Price (INR)": latest_prices.values,
-        "Weight (%)": weights.values,
-        "Weekly Return (%)": weekly_returns,
-        "Mkt Cap (Cr)": (market_caps_raw / 10000000).values, 
-        "P/E Ratio": aligned_meta['pe'].values,
-        "EPS (INR)": aligned_meta['eps'].values
-    })
+            stats.append({
+                "Ticker": ticker,
+                "Open": latest['Open'],
+                "High": latest['High'],
+                "Low": latest['Low'],
+                "LTP": ltp,
+                "Chng": change,
+                "%Chng": pct_change,
+                "Volume": vol,
+                "Value (Cr)": val_cr,
+                "52W H": high_52,
+                "52W L": low_52,
+                "30D %Chng": chng_30d
+            })
+            
+        except Exception:
+            pass # Skip tickers that failed to download
+            
+    return pd.DataFrame(stats).set_index("Ticker")
+
+def generate_full_report(rich_stats_df, metadata_df):
+    """Combines the Rich Market Data with Fundamental Data (Shares, PE)."""
     
-    display_df = display_df.set_index("Ticker")
-    display_df = display_df.sort_values(by="Weight (%)", ascending=False)
-    return display_df
+    # Align Data (Intersection)
+    valid_tickers = rich_stats_df.index.intersection(metadata_df.index)
+    
+    stats = rich_stats_df.loc[valid_tickers]
+    meta = metadata_df.loc[valid_tickers]
+    
+    # Calculate Market Cap (LTP * Shares)
+    mkt_cap = stats['LTP'] * meta['shares']
+    total_mkt_cap = mkt_cap.sum()
+    
+    # Calculate Index Weight
+    weights = (mkt_cap / total_mkt_cap) * 100 if total_mkt_cap != 0 else 0
+    
+    # Merge everything
+    final_df = stats.copy()
+    final_df['Weight (%)'] = weights
+    final_df['Mkt Cap (Cr)'] = mkt_cap / 10000000
+    final_df['P/E'] = meta['pe']
+    final_df['EPS'] = meta['eps']
+    
+    return final_df
 
 # --- NEW: RISK CALCULATOR ---
 def calculate_risk_metrics(series, name):
     if series is None or len(series) < 2:
         return {"Name": name, "Volatility": np.nan, "Max Drawdown": np.nan}
-    
-    # Daily Returns
     daily_ret = series.pct_change().dropna()
-    
-    # 1. Annualized Volatility (Standard Deviation * sqrt(252 trading days))
     volatility = daily_ret.std() * np.sqrt(252) * 100
-    
-    # 2. Max Drawdown (Peak to Trough)
     cumulative = (1 + daily_ret).cumprod()
     peak = cumulative.cummax()
     drawdown = (cumulative - peak) / peak
     max_drawdown = drawdown.min() * 100
-    
-    return {
-        "Name": name, 
-        "Volatility (Ann.)": f"{volatility:.2f}%", 
-        "Max Drawdown": f"{max_drawdown:.2f}%"
-    }
+    return {"Name": name, "Volatility (Ann.)": f"{volatility:.2f}%", "Max Drawdown": f"{max_drawdown:.2f}%"}
 
 # --- SIDEBAR ---
 st.sidebar.header("Configuration")
@@ -172,6 +211,7 @@ if start_date > end_date:
     st.sidebar.error("Error: Start Date must be before End Date.")
 else:
     if st.sidebar.button("Generate Dashboard"):
+        # 1. Fetch Fundamentals (Cached)
         if 'green_meta' not in st.session_state:
             with st.spinner("Fetching Fundamentals..."):
                 st.session_state['green_meta'] = fetch_fundamental_data(GREEN_TICKERS)
@@ -179,29 +219,35 @@ else:
             with st.spinner("Fetching Fundamentals..."):
                 st.session_state['startup_meta'] = fetch_fundamental_data(STARTUP_TICKERS)
         
-        with st.spinner(f"Crunching numbers..."):
-            g_series, g_prices, s_series, s_prices, n_series = get_dashboard_data(
-                start_date, end_date, st.session_state['green_meta'], st.session_state['startup_meta']
-            )
-        
+        # 2. Fetch Chart Data
+        with st.spinner(f"Calculating Indices..."):
+            g_series = calculate_weighted_index(GREEN_TICKERS, start_date, end_date, st.session_state['green_meta']['shares'])
+            s_series = calculate_weighted_index(STARTUP_TICKERS, start_date, end_date, st.session_state['startup_meta']['shares'])
+            
+            # Benchmark
+            end_str = (end_date + timedelta(days=1)).strftime('%Y-%m-%d')
+            nifty_data = yf.download(BENCHMARK_TICKER, start=start_date, end=end_str, threads=False, auto_adjust=False)
+            if not nifty_data.empty:
+                try:
+                    bench = nifty_data['Adj Close'][BENCHMARK_TICKER]
+                except:
+                    bench = nifty_data['Adj Close']
+                bench = bench.ffill().bfill()
+                n_series = (bench / bench.iloc[0]) * 100
+            else:
+                n_series = None
+
         if g_series is None:
             st.error("No data found.")
         else:
-            # --- 1. EXPORT BUTTON (Sidebar) ---
-            # Create a combined CSV for download
-            export_df = pd.DataFrame({"Green Index": g_series, "NIFTY 50": n_series})
-            if s_series is not None: export_df["Startup Index"] = s_series
-            
-            csv = export_df.to_csv().encode('utf-8')
-            st.sidebar.download_button(
-                label="📥 Download Index Data (CSV)",
-                data=csv,
-                file_name=f"market_data_{start_date}_{end_date}.csv",
-                mime='text/csv',
-            )
+            # 3. Fetch Rich Table Data (Snapshot)
+            with st.spinner("Fetching Detailed Quote Stats (52W High/Low, Vol, etc.)..."):
+                g_rich_stats = fetch_rich_stats(GREEN_TICKERS, end_date)
+                s_rich_stats = fetch_rich_stats(STARTUP_TICKERS, end_date)
 
-            # --- 2. TOP METRICS ---
-            st.subheader(f"Performance Overview ({start_date} to {end_date})")
+            # --- DISPLAY DASHBOARD ---
+            
+            # Metrics
             g_final = g_series.iloc[-1]
             n_final = n_series.iloc[-1] if n_series is not None else 100
             s_final = s_series.iloc[-1] if s_series is not None else 100
@@ -212,7 +258,7 @@ else:
             if s_series is not None:
                 col3.metric("Startup Index", f"{s_final:.2f}", f"{(s_final-100):.2f}%")
 
-            # --- 3. CHART ---
+            # Chart
             fig, ax = plt.subplots(figsize=(12, 5))
             ax.plot(g_series.index, g_series, label='Green Energy', color='#2ca02c', linewidth=2.5)
             if s_series is not None:
@@ -222,50 +268,50 @@ else:
             ax.axhline(y=100, color='black', alpha=0.3)
             ax.legend()
             ax.grid(True, alpha=0.2)
-            ax.xaxis.set_major_formatter(mdates.DateFormatter('%b %d'))
             st.pyplot(fig)
-
-            with st.expander("How is this Score Calculated?"):
-                st.markdown("We use a **Market-Cap Weighted** formula, normalized to 100 on the start date.")
             
-            st.divider()
-
-            # --- 4. RISK METRICS SECTION ---
-            st.subheader("⚠️ Risk Analysis")
-            st.caption("Volatility measures how wild the price swings are. Max Drawdown measures the worst possible loss from a peak.")
-            
-            risk_data = [
-                calculate_risk_metrics(g_series, "Green Energy"),
-                calculate_risk_metrics(n_series, "NIFTY 50"),
-                calculate_risk_metrics(s_series, "Startups")
-            ]
-            risk_df = pd.DataFrame(risk_data).set_index("Name")
-            st.table(risk_df)
+            # Risk Stats
+            st.caption("Risk Metrics:")
+            risk_data = [calculate_risk_metrics(g_series, "Green Energy"), calculate_risk_metrics(n_series, "NIFTY 50")]
+            if s_series is not None: risk_data.append(calculate_risk_metrics(s_series, "Startups"))
+            st.table(pd.DataFrame(risk_data).set_index("Name"))
 
             st.divider()
 
-            # --- 5. TRANSPARENCY SECTION ---
-            st.subheader("Index Transparency & Fundamentals")
-            tab1, tab2 = st.tabs(["Green Energy", "Startups"])
-            
-            column_config = {
-                "Price (INR)": st.column_config.NumberColumn(format="INR %.2f"),
-                "Weight (%)": st.column_config.ProgressColumn("Impact", format="%.1f%%", min_value=0, max_value=100),
-                "Weekly Return (%)": st.column_config.NumberColumn("Weekly Trend", format="%.2f%%"),
-                "Mkt Cap (Cr)": st.column_config.NumberColumn("Market Cap (Cr)", format="INR %d Cr"),
-                "P/E Ratio": st.column_config.NumberColumn("P/E Ratio", format="%.1f"),
-                "EPS (INR)": st.column_config.NumberColumn("EPS", format="INR %.2f")
+            # --- DETAILED TABLES ---
+            st.subheader("📊 Comprehensive Market Data")
+            tab1, tab2 = st.tabs(["⚡ Green Energy", "🦄 Startups"])
+
+            # Column Config for Fancy Display
+            col_config = {
+                "LTP": st.column_config.NumberColumn("LTP", format="%.2f"),
+                "Chng": st.column_config.NumberColumn("Chng", format="%.2f"),
+                "%Chng": st.column_config.NumberColumn("%Chng", format="%.2f%%"),
+                "Volume": st.column_config.NumberColumn("Volume", format="%d"),
+                "Value (Cr)": st.column_config.NumberColumn("Value (Cr)", format="%.2f"),
+                "Weight (%)": st.column_config.ProgressColumn("Weight", format="%.1f%%", min_value=0, max_value=100),
+                "52W H": st.column_config.NumberColumn("52W High", format="%.2f"),
+                "52W L": st.column_config.NumberColumn("52W Low", format="%.2f"),
+                "30D %Chng": st.column_config.NumberColumn("30D %", format="%.2f%%"),
+                "Mkt Cap (Cr)": st.column_config.NumberColumn("Mkt Cap (Cr)", format="%.0f"),
             }
 
             with tab1:
-                g_table = generate_transparency_table(g_prices, st.session_state['green_meta'])
-                st.dataframe(g_table, column_config=column_config, use_container_width=True)
+                if not g_rich_stats.empty:
+                    g_table = generate_full_report(g_rich_stats, st.session_state['green_meta'])
+                    # Reorder columns to match the image style
+                    cols = ["Open", "High", "Low", "LTP", "Chng", "%Chng", "Volume", "Value (Cr)", "52W H", "52W L", "30D %Chng", "Weight (%)", "Mkt Cap (Cr)", "P/E"]
+                    # Filter only columns that exist (in case of missing data)
+                    cols = [c for c in cols if c in g_table.columns]
+                    st.dataframe(g_table[cols], column_config=col_config, use_container_width=True)
 
             with tab2:
-                if s_prices is not None:
-                    s_table = generate_transparency_table(s_prices, st.session_state['startup_meta'])
-                    st.dataframe(s_table, column_config=column_config, use_container_width=True)
+                if not s_rich_stats.empty:
+                    s_table = generate_full_report(s_rich_stats, st.session_state['startup_meta'])
+                    cols = ["Open", "High", "Low", "LTP", "Chng", "%Chng", "Volume", "Value (Cr)", "52W H", "52W L", "30D %Chng", "Weight (%)", "Mkt Cap (Cr)"]
+                    cols = [c for c in cols if c in s_table.columns]
+                    st.dataframe(s_table[cols], column_config=col_config, use_container_width=True)
                 else:
-                    st.warning("Insufficient data.")
+                    st.warning("No data available for Startups.")
     else:
         st.info("Select dates and click 'Generate Dashboard'.")
