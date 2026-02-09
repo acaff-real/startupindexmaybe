@@ -264,11 +264,11 @@ else:
 
             
             fig, ax = plt.subplots(figsize=(12, 5))
-            ax.plot(g_series.index, g_series, label='Green Energy', color='
+            ax.plot(g_series.index, g_series, label='Green Energy', color='#2ca02c', linewidth=2.5)
             if s_series is not None:
-                ax.plot(s_series.index, s_series, label='Startups', color='
+                ax.plot(s_series.index, s_series, label='Startups', color='#9467bd', linewidth=2.5)
             if n_series is not None:
-                ax.plot(n_series.index, n_series, label='NIFTY 50', color='
+                ax.plot(n_series.index, n_series, label='NIFTY 50', color='#7f7f7f', linestyle='--', linewidth=1)
             ax.axhline(y=100, color='black', alpha=0.3)
             ax.legend()
             ax.grid(True, alpha=0.2)
