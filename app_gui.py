@@ -21,7 +21,11 @@ STARTUP_TICKERS = [
     "OLAELEC.NS", "SHADOWFAX.NS", "AMAGI.NS", "DEVX.NS", 
     "SMARTWORKS.NS", "ARISINFRA.NS", "ZAPPFRESH.BO", "MEESHO.NS",
      "GROWW.BO", "LENSKART.NS", "PINELABS.NS", "URBANCO.NS",
-     "WEWORK.NS",  "INDIQUBE.NS"   
+     "WEWORK.NS",  "INDIQUBE.NS", "DELHIVERY.NS", "IDEAFORGE.NS",
+    "POLICYBZR.NS", "PWL.BO", "SWIGGY.NS", "IXIGO.NS", 
+    "FIRSTCRY.NS", "TBOTEK.NS", "NETWEB.NS", "MOBIKWIK.NS",
+    "BLACKBUCK.NS", "JARO.NS", "CAPILLARY.NS", "RATEGAIN.NS",
+    "YATRA.NS", "BLUESTONE.NS", "WAKEFIT.NS"
 ]
 
 
@@ -280,7 +284,7 @@ else:
 
             # --- DETAILED TABLES ---
             st.subheader("📊 Comprehensive Market Data")
-            tab1, tab2 = st.tabs(["⚡ Green Energy", "🦄 Startups"])
+            tab1, tab2 = st.tabs(["Green Energy", "Startups"])
 
             # Column Config for Fancy Display
             col_config = {
