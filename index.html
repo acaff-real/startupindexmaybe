@@ -7,358 +7,124 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
     <div class="main-container">
-        <header>
-            <div>
-                <h1>Startup Ventures Fund</h1>
-                <div class="subtitle">Live Market Cap Weighted Performance</div>
+        
+        <section id="hero">
+            <div class="hero-flex">
+                <div class="logo-placeholder">
+                    LOGOGOESHERE
+                </div>
+                <div>
+                    <h1>Startup <span class="highlight">INDEX</span></h1>
+                    <p class="about-text">
+                        A real-time, market-capitalization weighted index tracking the performance of India's most prominent publicly listed new-age technology companies. Providing institutional-grade visibility into the startup ecosystem.
+                    </p>
+                </div>
             </div>
-        </header>
+        </section>
 
-        <div class="metrics-grid">
-            <div class="metric-box">
-                <div class="metric-title" id="title-current">Index Level</div>
-                <div class="metric-value" id="val-current">---</div>
+        <section id="performance">
+            <h2 class="section-title">Index <span class="highlight">Performance</span></h2>
+            
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="metric-title" id="title-current">Index Level</div>
+                    <div class="metric-value" id="val-current">---</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title" id="title-change">Period Change</div>
+                    <div class="metric-value" id="val-change">---</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-title" id="title-pct">Period %</div>
+                    <div class="metric-value" id="val-pct">---</div>
+                </div>
             </div>
-            <div class="metric-box">
-                <div class="metric-title" id="title-change">Period Change</div>
-                <div class="metric-value" id="val-change">---</div>
+
+            <div class="timeframe-selector" id="timeframe-controls">
+                <button class="tf-btn" data-tf="1W">1W</button>
+                <button class="tf-btn" data-tf="1M">1M</button>
+                <button class="tf-btn" data-tf="3M">3M</button>
+                <button class="tf-btn active" data-tf="YTD">YTD</button>
+                <button class="tf-btn" data-tf="1Y">1Y</button>
             </div>
-            <div class="metric-box">
-                <div class="metric-title" id="title-pct">Period %</div>
-                <div class="metric-value" id="val-pct">---</div>
+
+            <div class="chart-container">
+                <canvas id="terminalChart"></canvas>
             </div>
-        </div>
 
-        <div class="timeframe-selector" id="timeframe-controls">
-            <button class="tf-btn" data-tf="1W">1W</button>
-            <button class="tf-btn" data-tf="1M">1M</button>
-            <button class="tf-btn" data-tf="3M">3M</button>
-            <button class="tf-btn active" data-tf="YTD">YTD</button>
-            <button class="tf-btn" data-tf="1Y">1Y</button>
-        </div>
+            <div class="ai-box">
+                <div class="ai-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    AI Analyst Insight
+                </div>
+                <p class="ai-text">
+                    The index has shown resilience this quarter, primarily driven by a 15% rally in fintech constituents which are benefiting from renewed payment volume growth. E-commerce stocks remain a drag on performance due to margin pressure concerns. The overall technical trend remains bullish above the 105 level. [Dummy Generated Text]
+                </p>
+            </div>
+        </section>
 
-        <div class="chart-container">
-            <canvas id="terminalChart"></canvas>
-        </div>
+        <section id="composition">
+             <h2 class="section-title">Index <span class="highlight">Composition</span></h2>
+             <div class="comp-grid" id="comp-grid">
+                 </div>
+        </section>
 
-        <div class="ipo-section">
-            <h2>Upcoming Tech IPOs</h2>
+        <section id="52week">
+             <h2 class="section-title">52-Week <span class="highlight">Overview</span></h2>
+             <div class="chart-container short">
+                 <canvas id="fiftyTwoWeekChart"></canvas>
+             </div>
+        </section>
+
+        <section id="ipos">
+            <h2 class="section-title">Upcoming Tech <span class="highlight">IPOs</span></h2>
             <div class="ipo-grid" id="ipo-grid">
                 </div>
-        </div>
+        </section>
     </div>
 
-    <div id="ipo-modal" class="modal-overlay">
+    <div id="info-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-close" onclick="closeModal()">&times;</div>
             <div class="modal-header">
-                <h3 id="m-name">Company Name</h3>
-                <div class="modal-tag">DRHP Filed</div>
+                <h3 id="m-name">---</h3>
+                <div class="modal-tag" id="m-tag">---</div>
             </div>
             <div class="modal-stats">
                 <div class="m-stat">
-                    <span>Expected Date</span>
-                    <strong id="m-date">---</strong>
+                    <span id="lbl-1">Date</span>
+                    <strong id="val-1">---</strong>
                 </div>
                 <div class="m-stat">
-                    <span>Price Band</span>
-                    <strong id="m-price" style="color: var(--accent-neon);">---</strong>
+                    <span id="lbl-2">Price</span>
+                    <strong id="val-2" style="color: var(--accent-neon);">---</strong>
                 </div>
                 <div class="m-stat">
-                    <span>Issue Size</span>
-                    <strong id="m-issue">---</strong>
+                    <span id="lbl-3">Size</span>
+                    <strong id="val-3">---</strong>
                 </div>
                 <div class="m-stat">
-                    <span>Est. Valuation</span>
-                    <strong id="m-val">---</strong>
+                    <span id="lbl-4">Valuation</span>
+                    <strong id="val-4">---</strong>
                 </div>
                 <div class="m-stat">
-                    <span>Sector</span>
-                    <strong id="m-sector">---</strong>
+                    <span id="lbl-5">Sector</span>
+                    <strong id="val-5">---</strong>
                 </div>
                 <div class="m-stat">
-                    <span>Lead Manager</span>
-                    <strong id="m-bank">Goldman Sachs</strong>
+                    <span id="lbl-6">Notes</span>
+                    <strong id="val-6">---</strong>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        let chartInstance = null;
-        let currentTimeframe = 'YTD';
-        let autoRefreshInterval = null;
-        let masterData = null; 
-
-        // --- IPO MODAL & GRID LOGIC ---
-        function openModal(name, dateStr, priceStr, issue, val, sector) {
-            document.getElementById('m-name').innerText = name;
-            document.getElementById('m-date').innerText = dateStr;
-            document.getElementById('m-price').innerText = priceStr;
-            document.getElementById('m-issue').innerText = '₹' + issue + ' Cr';
-            document.getElementById('m-val').innerText = '₹' + val + ' Cr';
-            document.getElementById('m-sector').innerText = sector;
-            
-            document.getElementById('ipo-modal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('ipo-modal').style.display = 'none';
-        }
-
-        // Close modal if user clicks outside the box
-        window.onclick = function(event) {
-            const modal = document.getElementById('ipo-modal');
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-
-        function generateDummyIPOs() {
-            const grid = document.getElementById('ipo-grid');
-            
-            // Adding dummy sectors for more realism
-            const companies = [
-                { name: "Zepto", sector: "Quick Commerce" },
-                { name: "Swiggy", sector: "Food Delivery" },
-                { name: "PhonePe", sector: "Fintech" },
-                { name: "Razorpay", sector: "Fintech" },
-                { name: "CRED", sector: "Fintech" },
-                { name: "Groww", sector: "Brokerage" },
-                { name: "Ather Energy", sector: "EV Manufacturing" },
-                { name: "Digit Insurance", sector: "Insurtech" },
-                { name: "MobiKwik", sector: "Fintech" },
-                { name: "Oyo Rooms", sector: "Hospitality" },
-                { name: "PharmEasy", sector: "Healthtech" },
-                { name: "Pine Labs", sector: "Fintech" },
-                { name: "Boat Lifestyle", sector: "Consumer Electronics" },
-                { name: "Lenskart", sector: "E-commerce" },
-                { name: "Meesho", sector: "E-commerce" },
-                { name: "Unacademy", sector: "Edtech" },
-                { name: "Dream11", sector: "Gaming" },
-                { name: "OfBusiness", sector: "B2B E-commerce" },
-                { name: "ShareChat", sector: "Social Media" },
-                { name: "Spinny", sector: "Auto-Tech" },
-                { name: "Upstox", sector: "Brokerage" },
-                { name: "Zetwerk", sector: "B2B Manufacturing" },
-                { name: "Cars24", sector: "Auto-Tech" },
-                { name: "Dunzo", sector: "Quick Commerce" },
-                { name: "Cure.fit", sector: "Health & Fitness" }
-            ];
-            
-            let htmlContent = '';
-            companies.forEach((company) => {
-                // Generate random stats
-                const randomDays = Math.floor(Math.random() * 90) + 1;
-                const ipoDate = new Date();
-                ipoDate.setDate(ipoDate.getDate() + randomDays);
-                const dateStr = ipoDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                
-                const basePrice = Math.floor(Math.random() * 800) + 100;
-                const topPrice = basePrice + Math.floor(Math.random() * 50) + 10;
-                const priceStr = `₹${basePrice} - ₹${topPrice}`;
-                
-                const issueSize = (Math.floor(Math.random() * 50) + 15) * 100; // Between 1500 and 6500 Cr
-                const valuation = issueSize * (Math.floor(Math.random() * 5) + 4); // Multiple of issue size
-
-                // Note the onclick event passing the generated data into the modal function
-                htmlContent += `
-                    <div class="ipo-card" onclick="openModal('${company.name}', '${dateStr}', '${priceStr}', '${issueSize.toLocaleString()}', '${valuation.toLocaleString()}', '${company.sector}')">
-                        <div class="ipo-name">${company.name}</div>
-                        <div class="ipo-date">Expected: ${dateStr}</div>
-                        <div class="ipo-price">${priceStr}</div>
-                    </div>
-                `;
-            });
-            grid.innerHTML = htmlContent;
-        }
-
-        // --- CHART & DATA LOGIC ---
-        function getStartDate(tf) {
-            const end = new Date();
-            let start = new Date();
-            
-            if (tf === '1W') start.setDate(end.getDate() - 7);
-            if (tf === '1M') start.setMonth(end.getMonth() - 1);
-            if (tf === '3M') start.setMonth(end.getMonth() - 3);
-            if (tf === 'YTD') start = new Date(end.getFullYear(), 0, 1);
-            if (tf === '1Y') start.setFullYear(end.getFullYear() - 1);
-            
-            return start.toISOString().split('T')[0];
-        }
-
-        async function fetchMarketData() {
-            try {
-                const end = new Date();
-                let start = new Date();
-                start.setFullYear(end.getFullYear() - 1);
-                const startDateStr = start.toISOString().split('T')[0];
-
-                const response = await fetch(`http://127.0.0.1:5000/api/startups/chart?start=${startDateStr}`);
-                if (!response.ok) throw new Error("Network response was not ok");
-                
-                masterData = await response.json();
-
-                let lastKnown = null;
-                for (let i = 0; i < masterData.nifty_index.length; i++) {
-                    if (masterData.nifty_index[i] !== null) lastKnown = masterData.nifty_index[i];
-                    else if (lastKnown !== null) masterData.nifty_index[i] = lastKnown;
-                }
-                lastKnown = null;
-                for (let i = masterData.nifty_index.length - 1; i >= 0; i--) {
-                    if (masterData.nifty_index[i] !== null) lastKnown = masterData.nifty_index[i];
-                    else if (lastKnown !== null) masterData.nifty_index[i] = lastKnown;
-                }
-                
-                renderTimeframe(currentTimeframe);
-            } catch (error) {
-                console.error("API Error:", error);
-            }
-        }
-
-        function renderTimeframe(tf) {
-            if (!masterData || masterData.dates.length === 0) return;
-
-            const end = new Date();
-            let targetDate = new Date();
-            
-            if (tf === '1W') targetDate.setDate(end.getDate() - 7);
-            if (tf === '1M') targetDate.setMonth(end.getMonth() - 1);
-            if (tf === '3M') targetDate.setMonth(end.getMonth() - 3);
-            if (tf === 'YTD') targetDate = new Date(end.getFullYear(), 0, 1);
-            if (tf === '1Y') targetDate.setFullYear(end.getFullYear() - 1);
-            
-            const targetDateStr = targetDate.toISOString().split('T')[0];
-
-            let startIndex = 0;
-            for (let i = 0; i < masterData.dates.length; i++) {
-                if (masterData.dates[i] >= targetDateStr) {
-                    startIndex = i;
-                    break;
-                }
-            }
-
-            const slicedDates = masterData.dates.slice(startIndex);
-            const rawSlicedStartup = masterData.startup_index.slice(startIndex);
-            const rawSlicedNifty = masterData.nifty_index.slice(startIndex);
-
-            const baseStartup = rawSlicedStartup[0];
-            const slicedStartup = rawSlicedStartup.map(val => (val / baseStartup) * 100);
-
-            const baseNifty = rawSlicedNifty[0];
-            const slicedNifty = rawSlicedNifty.map(val => (val / baseNifty) * 100);
-
-            const latest = slicedStartup[slicedStartup.length - 1];
-            const firstInPeriod = slicedStartup[0]; 
-            
-            const change = latest - firstInPeriod;
-            const pctChange = (change / firstInPeriod) * 100;
-
-            document.getElementById('val-current').innerText = latest.toFixed(2);
-            
-            const changeStr = (change >= 0 ? "+" : "") + change.toFixed(2);
-            document.getElementById('val-change').innerText = changeStr;
-            
-            const pctStr = (pctChange >= 0 ? "+" : "") + pctChange.toFixed(2) + "%";
-            document.getElementById('val-pct').innerText = pctStr;
-
-            document.getElementById('title-change').innerText = `${tf} Change`;
-            document.getElementById('title-pct').innerText = `${tf} Return`;
-
-            const colorCode = change >= 0 ? 'var(--accent-neon)' : 'var(--accent-red)';
-            document.getElementById('val-change').style.color = colorCode;
-            document.getElementById('val-pct').style.color = colorCode;
-
-            drawChart(slicedDates, slicedStartup, slicedNifty, colorCode);
-        }
-
-        function drawChart(labels, startupData, niftyData, lineColor) {
-            const ctx = document.getElementById('terminalChart').getContext('2d');
-            
-            let gradient = ctx.createLinearGradient(0, 0, 0, 500);
-            const rgbColor = lineColor === 'var(--accent-neon)' ? '57, 255, 20' : '255, 80, 0';
-            gradient.addColorStop(0, `rgba(${rgbColor}, 0.15)`);
-            gradient.addColorStop(1, `rgba(${rgbColor}, 0.0)`);
-
-            if (chartInstance) { chartInstance.destroy(); }
-
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Startup Index',
-                            data: startupData,
-                            borderColor: lineColor, 
-                            backgroundColor: gradient,
-                            borderWidth: 2.5,
-                            pointRadius: 0,
-                            pointHoverRadius: 6,
-                            pointHoverBackgroundColor: lineColor,
-                            tension: 0.1,
-                            fill: true
-                        },
-                        {
-                            label: 'NIFTY 50',
-                            data: niftyData,
-                            borderColor: '#444444', 
-                            borderWidth: 1.5,
-                            borderDash: [5, 5],
-                            pointRadius: 0,
-                            pointHoverRadius: 0,
-                            tension: 0.1,
-                            fill: false
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#8a8a93', font: { family: 'Space Grotesk' }, maxTicksLimit: 6 } },
-                        y: { grid: { color: '#111111' }, ticks: { color: '#8a8a93', font: { family: 'Space Grotesk' } } }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#111111',
-                            titleColor: '#8a8a93',
-                            bodyColor: '#ffffff',
-                            titleFont: { family: 'Space Grotesk', weight: 'normal' },
-                            bodyFont: { family: 'Space Grotesk', size: 14 },
-                            padding: 15,
-                            cornerRadius: 8,
-                            displayColors: false,
-                            callbacks: { label: function(context) { return context.dataset.label + ': ' + context.parsed.y.toFixed(2); } }
-                        }
-                    }
-                }
-            });
-        }
-
-        document.querySelectorAll('.tf-btn').forEach(button => {
-            button.addEventListener('click', (e) => {
-                document.querySelectorAll('.tf-btn').forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
-                
-                currentTimeframe = e.target.getAttribute('data-tf');
-                renderTimeframe(currentTimeframe);
-            });
-        });
-
-        // Initialize
-        generateDummyIPOs();
-        fetchMarketData();
-        autoRefreshInterval = setInterval(() => fetchMarketData(), 60000);
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>

@@ -4,6 +4,7 @@
     --text-secondary: #8a8a93;
     --accent-neon: #39ff14; /* Lime green */
     --accent-red: #ff5000;
+    --section-border: #111;
 }
 
 body {
@@ -11,7 +12,7 @@ body {
     color: var(--text-primary);
     font-family: 'Space Grotesk', -apple-system, sans-serif;
     margin: 0;
-    padding: 40px;
+    padding: 0; /* Remove body padding for full-width sections */
     display: flex;
     justify-content: center;
 }
@@ -19,234 +20,167 @@ body {
 .main-container {
     width: 100%;
     max-width: 1200px;
+    padding: 0 40px; /* Add padding back to container */
 }
 
-header {
+/* --- GENERAL SECTION STYLES --- */
+section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--section-border);
+}
+
+section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 40px;
+    letter-spacing: -1px;
+}
+
+/* span to highlight title text with neon */
+.highlight { color: var(--accent-neon); }
+
+
+/* --- HERO & ABOUT SECTION --- */
+.hero-flex {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 30px;
+    align-items: flex-start;
+    gap: 40px;
+}
+
+.logo-placeholder {
+    width: 120px;
+    height: 120px;
+    background: #050505;
+    border: 2px solid var(--accent-neon);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--accent-neon);
+    letter-spacing: 2px;
+    box-shadow: 0 0 15px rgba(57, 255, 20, 0.2);
 }
 
 h1 {
-    margin: 0;
-    font-size: 42px;
-    font-weight: 500;
+    margin: 0 0 20px 0;
+    font-size: 48px;
+    font-weight: 600;
     letter-spacing: -1.5px;
-    color: var(--accent-neon);
+    line-height: 1.1;
 }
 
-.subtitle {
+.about-text {
+    font-size: 18px;
     color: var(--text-secondary);
-    font-size: 16px;
-    margin-top: 5px;
+    line-height: 1.6;
+    max-width: 700px;
 }
 
-.metrics-grid {
+
+/* --- PERFORMANCE SECTION --- */
+/* (Existing metrics and chart styles reused here) */
+.metrics-grid { display: flex; gap: 40px; margin-bottom: 30px; }
+.metric-box { display: flex; flex-direction: column; }
+.metric-title { font-size: 14px; color: var(--text-secondary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+.metric-value { font-size: 48px; font-weight: 500; letter-spacing: -2px; color: var(--text-primary); }
+
+.timeframe-selector { display: flex; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #111; padding-bottom: 10px; }
+.tf-btn { background: none; border: none; color: var(--text-secondary); font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; padding: 6px 12px; border-radius: 6px; transition: all 0.2s ease; }
+.tf-btn:hover { color: var(--text-primary); }
+.tf-btn.active { color: var(--accent-neon); background: rgba(57, 255, 20, 0.1); }
+
+.chart-container { position: relative; height: 500px; width: 100%; }
+
+/* New AI Commentary Box */
+.ai-box {
+    margin-top: 40px;
+    background: #080808;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 25px;
+    border-left: 4px solid var(--accent-neon);
+}
+
+.ai-header {
     display: flex;
-    gap: 40px;
-    margin-bottom: 30px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: var(--accent-neon);
+    font-weight: 600;
 }
 
-.metric-box {
+.ai-text {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    font-size: 15px;
+}
+
+
+/* --- COMPOSITION SECTION --- */
+.comp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.comp-card {
+    background-color: #050505;
+    border: 1px solid #222;
+    border-radius: 8px;
+    padding: 20px;
+    transition: all 0.2s ease;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
 }
 
-.metric-title {
-    font-size: 14px;
-    color: var(--text-secondary);
-    margin-bottom: 5px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.metric-value {
-    font-size: 48px;
-    font-weight: 500;
-    letter-spacing: -2px;
-    color: var(--text-primary);
-}
-
-.timeframe-selector {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #111;
-    padding-bottom: 10px;
-}
-
-.tf-btn {
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 6px 12px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
-}
-
-.tf-btn:hover {
-    color: var(--text-primary);
-}
-
-.tf-btn.active {
-    color: var(--accent-neon);
-    background: rgba(57, 255, 20, 0.1); 
-}
-
-.chart-container {
-    position: relative;
-    height: 500px;
-    width: 100%;
-}
-
-/* --- UPCOMING IPOS SECTION --- */
-.ipo-section {
-    margin-top: 60px;
-    padding-top: 30px;
-    border-top: 1px solid #111;
-}
-
-.ipo-section h2 {
-    font-size: 24px;
-    font-weight: 500;
-    margin-bottom: 20px;
-    color: var(--text-primary);
-    letter-spacing: -0.5px;
-}
-
-.ipo-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
-}
-
-.ipo-card {
-    background-color: #050505;
-    border: 1px solid #222;
-    border-radius: 8px;
-    padding: 15px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-}
-
-.ipo-card:hover {
+.comp-card:hover {
     border-color: var(--accent-neon);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(57, 255, 20, 0.05);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(57, 255, 20, 0.1);
 }
 
-.ipo-name {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+.comp-ticker { font-size: 13px; color: var(--text-secondary); margin-bottom: 5px; }
+.comp-name { font-size: 18px; font-weight: 600; color: var(--text-primary); margin-bottom: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+.comp-stats { display: flex; justify-content: space-between; margin-top: auto; }
+.c-stat-val { font-weight: 600; color: var(--text-primary); }
+.c-stat-lbl { font-size: 12px; color: var(--text-secondary); }
 
-.ipo-date {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-bottom: 12px;
-}
 
-.ipo-price {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--accent-neon);
-}
+/* --- 52 WEEK SECTION --- */
+/* Reuses .chart-container but we might want a specific height override */
+.chart-container.short { height: 350px; }
+
+
+/* --- IPO SECTION --- */
+.ipo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+.ipo-card { background-color: #050505; border: 1px solid #222; border-radius: 8px; padding: 15px; transition: all 0.2s ease; cursor: pointer; }
+.ipo-card:hover { border-color: var(--accent-neon); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(57, 255, 20, 0.05); }
+.ipo-name { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ipo-date { font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; }
+.ipo-price { font-size: 14px; font-weight: 500; color: var(--accent-neon); }
+
 
 /* --- MODAL STYLES --- */
-.modal-overlay {
-    display: none; /* Hidden by default */
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(5px); /* Creates that modern frosted glass effect */
-    z-index: 1000;
-    justify-content: center;
-    align-items: center;
-}
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; }
+.modal-content { background: #0a0a0a; border: 1px solid var(--accent-neon); border-radius: 12px; width: 90%; max-width: 550px; padding: 35px; position: relative; box-shadow: 0 0 30px rgba(57, 255, 20, 0.2); animation: modalFadeIn 0.2s ease-out; }
+@keyframes modalFadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.modal-close { position: absolute; top: 20px; right: 25px; color: var(--text-secondary); font-size: 24px; cursor: pointer; transition: color 0.2s; }
+.modal-close:hover { color: var(--accent-red); }
+.modal-header h3 { margin: 0 0 10px 0; font-size: 32px; color: var(--text-primary); letter-spacing: -1px; }
+.modal-tag { display: inline-block; background: rgba(57, 255, 20, 0.1); color: var(--accent-neon); padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 0.5px; }
+/* Different colors for different tags */
+.modal-tag.ipo { background: rgba(57, 255, 20, 0.1); color: var(--accent-neon); }
+.modal-tag.stock { background: rgba(255, 255, 255, 0.1); color: var(--text-primary); }
 
-.modal-content {
-    background: #0a0a0a;
-    border: 1px solid var(--accent-neon);
-    border-radius: 12px;
-    width: 90%;
-    max-width: 500px;
-    padding: 30px;
-    position: relative;
-    box-shadow: 0 0 25px rgba(57, 255, 20, 0.15);
-    animation: modalFadeIn 0.2s ease-out;
-}
-
-@keyframes modalFadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.modal-close {
-    position: absolute;
-    top: 20px; right: 25px;
-    color: var(--text-secondary);
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: color 0.2s;
-}
-
-.modal-close:hover {
-    color: var(--accent-red);
-}
-
-.modal-header h3 {
-    margin: 0 0 8px 0;
-    font-size: 32px;
-    color: var(--text-primary);
-    letter-spacing: -1px;
-}
-
-.modal-tag {
-    display: inline-block;
-    background: rgba(57, 255, 20, 0.1);
-    color: var(--accent-neon);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 25px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.modal-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-}
-
-.m-stat {
-    background: #111;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #222;
-}
-
-.m-stat span {
-    display: block;
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-bottom: 5px;
-    text-transform: uppercase;
-}
-
-.m-stat strong {
-    font-size: 18px;
-    color: var(--text-primary);
-}
+.modal-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.m-stat { background: #111; padding: 20px; border-radius: 8px; border: 1px solid #222; }
+.m-stat span { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;}
+.m-stat strong { font-size: 20px; color: var(--text-primary); }
