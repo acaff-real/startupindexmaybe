@@ -5,7 +5,7 @@ A real-time dashboard tracking the performance of India's new-age technology sto
 ## 🛠️ Prerequisites
 
 * **Python 3.8+** installed.
-* 
+
 
 ### 1. Clone the Repository
 ```bash
